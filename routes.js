@@ -33,13 +33,13 @@ const airports = async function(req, res) {
   });
 }
 
-// Route 1: GET /airports/:state
+// Route 1: GET /airports/:city
 const city = async function(req, res) {
-  const stateVar = req.params.state;
+  const cityVar = req.params.state;
   connection.query(`
   SELECT *
   FROM Airports
-  WHERE city LIKE ?`, [city],
+  WHERE city LIKE ?`, [cityVar],
   (err, data) => {
     if (err || data.length === 0) {
       console.log(err);
