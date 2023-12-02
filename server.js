@@ -11,12 +11,14 @@ app.use(cors({
 // We use express to define our various API endpoints and
 // provide their handlers that we implemented in routes.js
 app.get('/airports/:state', routes.airports);
-app.get('/airbnbsNearAirport/:airportCode', routes.airbnbsNearAirport);
+app.get('/airbnbsNearAirport/:airportCode/:distance', routes.airbnbsNearAirport);
 app.get('/airbnbs', routes.airbnbs);
 app.get('/restaurants', routes.restaurants);
-app.get('/restaurantNearAirport/:airportCode', routes.restaurantNearAirport);
-app.get('/restaurantsNearAirbnb/:listingID', routes.restaurantsNearAirbnb);
+app.get('/restaurantNearAirport/:airportCode/:distance', routes.restaurantNearAirport);
+app.get('/restaurantsNearAirbnb/:listingID/:distance', routes.restaurantsNearAirbnb);
 app.get('/airbnbsHighPrice', routes.airbnbsHighPrice);
+app.get('/RestaurantAffordableAirbnbAirport/:latitude/:longitude', routes.RestaurantAffordableAirbnbAirport);
+app.get('/RestaurantAirbnbAirport/:latitude/:longitude', routes.RestaurantAirbnbAirport);
 
 
 
