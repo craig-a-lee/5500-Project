@@ -33,9 +33,9 @@ const airports = async function(req, res) {
   });
 }
 
-// Route 2: GET /airports/:city
-const city = async function(req, res) {
-  const cityName = req.params.state;
+// Route 2: GET /airportsCity/:city
+const airportsCity = async function(req, res) {
+  const cityName = req.params.city;
   connection.query(`
   SELECT *
   FROM Airports

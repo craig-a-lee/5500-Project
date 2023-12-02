@@ -10,16 +10,37 @@ app.use(cors({
 
 // We use express to define our various API endpoints and
 // provide their handlers that we implemented in routes.js
-app.get('/airports/:state', routes.airports);
-app.get('/airbnbsNearAirport/:airportCode/:distance', routes.airbnbsNearAirport);
-app.get('/airbnbs', routes.airbnbs);
-app.get('/restaurants', routes.restaurants);
-app.get('/restaurantNearAirport/:airportCode/:distance', routes.restaurantNearAirport);
-app.get('/restaurantsNearAirbnb/:listingID/:distance', routes.restaurantsNearAirbnb);
-app.get('/airbnbsHighPrice', routes.airbnbsHighPrice);
-app.get('/RestaurantAffordableAirbnbAirport/:latitude/:longitude', routes.RestaurantAffordableAirbnbAirport);
-app.get('/RestaurantAirbnbAirport/:latitude/:longitude', routes.RestaurantAirbnbAirport);
 
+// Route 1: GET /airports/:state
+app.get('/airports/:state', routes.airports);
+
+// Route 2: GET /airportsCity/:city
+app.get('/airportsCity/:city', routes.city);
+
+// Route 3: GET /airbnbs
+app.get('/airbnbs', routes.airbnbs);
+
+// Route 4: GET /airbnbsHighPrice
+app.get('/airbnbsHighPrice', routes.airbnbsHighPrice);
+
+// Route 5: GET /airbnbsNearAirport/:airportCode/:distance
+app.get('/airbnbsNearAirport/:airportCode/:distance', routes.airbnbsNearAirport);
+
+// Route 6: GET /restaurantNearAirport/:airportCode/:distance
+app.get('/restaurantNearAirport/:airportCode/:distance', routes.restaurantNearAirport);
+
+// Route 7: GET /restaurantsNearAirbnb/:listingID/:distance
+app.get('/restaurantsNearAirbnb/:listingID/:distance', routes.restaurantsNearAirbnb);
+
+// Route 8: GET /restaurants
+app.get('/restaurants', routes.restaurants);
+
+
+// Route 9: GET /RestaurantAffordableAirbnbAirport/:latitude/:longitude
+app.get('/RestaurantAffordableAirbnbAirport/:latitude/:longitude', routes.RestaurantAffordableAirbnbAirport);
+
+// Route 10: GET /AirbnbsRestaurantCategory/:category
+app.get('/AirbnbsRestaurantCategory/:category', routes.AirbnbsRestaurantCategory);
 
 
 app.listen(config.server_port, () => {
