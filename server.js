@@ -15,7 +15,7 @@ app.use(cors({
 app.get('/airports/:state', routes.airports);
 
 // Route 2: GET /airportsCity/:city
-app.get('/airportsCity/:city', routes.city);
+app.get('/airportsCity/:city', routes.airportsCity);
 
 // Route 3: GET /airbnbs
 app.get('/airbnbs', routes.airbnbs);
@@ -34,7 +34,6 @@ app.get('/restaurantsNearAirbnb/:listingID/:distance', routes.restaurantsNearAir
 
 // Route 8: GET /restaurants
 app.get('/restaurants', routes.restaurants);
-
 
 // Route 9: GET /RestaurantAffordableAirbnbAirport/:latitude/:longitude
 app.get('/RestaurantAffordableAirbnbAirport/:latitude/:longitude', routes.RestaurantAffordableAirbnbAirport);

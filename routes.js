@@ -93,7 +93,7 @@ const airbnbsNearAirport = async function(req, res) {
   WITH relevantAirport AS(
     SELECT iata, latitude, longitude
     FROM Airports
-    WHERE Iata = ${airportCode}),
+    WHERE Iata = '${airportCode}'),
   nearbyAirbnbs AS (
     SELECT *
     FROM Airbnb
@@ -132,7 +132,7 @@ const restaurantNearAirport = async function(req, res) {
   WITH relevantAirport AS(
     SELECT iata, latitude, longitude
     FROM Airports
-    WHERE iata = ${airportCode}),
+    WHERE iata = '${airportCode}'),
   nearbyRestaurants AS (
     SELECT *
     FROM Restaurant
@@ -208,7 +208,6 @@ const restaurants = async function(req, res) {
   connection.query(`
   SELECT *
   FROM Restaurant`, 
-  
   (err, data) => {
     if (err || data.length === 0) {
       console.log(err);
@@ -374,6 +373,7 @@ const AirbnbsRestaurantCategory = async function(req, res) {
 
 module.exports = {
   airports,
+  airportsCity,
   airbnbs,
   restaurants,
   airbnbsHighPrice,
