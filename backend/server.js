@@ -41,6 +41,13 @@ app.get('/RestaurantAffordableAirbnbAirport/:latitude/:longitude', routes.Restau
 // Route 10: GET /AirbnbsRestaurantCategory/:category
 app.get('/AirbnbsRestaurantCategory/:category', routes.AirbnbsRestaurantCategory);
 
+// Route 11: GET /allStates
+app.get('/allStates', routes.getAllStates);
+
+// Route 12: GET /cities/:state
+app.get('/cities/:state', routes.getCitiesByState);
+
+
 
 app.listen(config.server_port, () => {
   console.log(`Server running at http://${config.server_host}:${config.server_port}/`)

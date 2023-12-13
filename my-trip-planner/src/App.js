@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Airbnbs from './components/Airbnbs';
 import Home from './components/Home';
 import Navbar from './components/Navbar';
+import PlanTrips from './components/PlanTrips';
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/airbnbs" element={<Airbnbs />} />
+        <Route path="/plan-trip" element={<PlanTrips />} />
       </Routes>
     </Router>
   );

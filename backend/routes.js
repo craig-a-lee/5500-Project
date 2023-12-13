@@ -380,6 +380,33 @@ const AirbnbsRestaurantCategory = async function(req, res) {
   });
 }
 
+// Route 11: GET /allStates
+const getAllStates = async function(req, res) {
+  connection.query('SELECT DISTINCT state FROM Airports ORDER BY state', (err, data) => {
+    if (err) {
+      console.log(err);
+      res.json({});
+    } else {
+      res.json(data.map(row => row.state));
+    }
+  });
+};
+
+// Route 11: GET /:state/:city
+const getCitiesByState = async function(req, res) {
+  const state = req.params.state;
+  connection.query('SELECT DISTINCT city FROM Airports WHERE state = ? ORDER BY city', [state], (err, data) => {
+    if (err) {
+      console.log(err);
+      res.json({});
+    } else {
+      res.json(data.map(row => row.city));
+    }
+  });
+};
+
+
+
 
 
 module.exports = {
@@ -393,4 +420,6 @@ module.exports = {
   restaurantsNearAirbnb,
   RestaurantAffordableAirbnbAirport,
   AirbnbsRestaurantCategory,
+  getAllStates,
+  getCitiesByState
 }
