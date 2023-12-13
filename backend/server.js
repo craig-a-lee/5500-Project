@@ -17,6 +17,9 @@ app.get('/airports/:state', routes.airports);
 // Route 2: GET /airportsCity/:city
 app.get('/airportsCity/:city', routes.airportsCity);
 
+// Route 2: GET /airports
+app.get('/airports', routes.getAllAirports);
+
 // Route 3: GET /airbnbs
 app.get('/airbnbs', routes.airbnbs);
 
@@ -46,6 +49,12 @@ app.get('/allStates', routes.getAllStates);
 
 // Route 12: GET /cities/:state
 app.get('/cities/:state', routes.getCitiesByState);
+
+// Route: GET /restaurants/:restaurantId
+app.get('/restaurants/:restaurantId', routes.getRestaurantDetail);
+
+// Route: GET /airports/:iata
+app.get('/airportByIATA/:iata', routes.getAirportByIATA);
 
 
 

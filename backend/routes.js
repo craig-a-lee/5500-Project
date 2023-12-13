@@ -19,36 +19,93 @@ connection.connect((err) => err && console.log(err));
 // Route 1: GET /airports/:state
 const airports = async function(req, res) {
   const stateVar = req.params.state;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = parseInt(req.query.offset) || 0;
+  const sortBy = req.query.sortBy || 'airport'; 
+
   connection.query(`
   SELECT *
   FROM Airports
-  WHERE state LIKE ?`, [stateVar],
+  WHERE state LIKE ?
+  ORDER BY ${connection.escapeId(sortBy)}
+  LIMIT ?, ?`, [stateVar, offset, limit],
   (err, data) => {
-    if (err || data.length === 0) {
+    if (err) {
       console.log(err);
-      res.json({});
+      res.status(500).json({ error: 'Internal server error' });
+    } else if (data.length === 0) {
+      res.status(404).json({ error: 'No airports found' });
     } else {
       res.json(data);
     }
   });
-}
+};
 
 // Route 2: GET /airportsCity/:city
 const airportsCity = async function(req, res) {
   const cityName = req.params.city;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = parseInt(req.query.offset) || 0;
+  const sortBy = req.query.sortBy || 'airport'; 
+
   connection.query(`
   SELECT *
   FROM Airports
-  WHERE city LIKE ?`, [cityName],
+  WHERE city LIKE ?
+  ORDER BY ${connection.escapeId(sortBy)}
+  LIMIT ?, ?`, [cityName, offset, limit],
   (err, data) => {
-    if (err || data.length === 0) {
+    if (err) {
       console.log(err);
-      res.json({});
+      res.status(500).json({ error: 'Internal server error' });
+    } else if (data.length === 0) {
+      res.status(404).json({ error: 'No airports found' });
     } else {
       res.json(data);
     }
   });
-}
+};
+
+// Route: GET /airports
+const getAllAirports = async function(req, res) {
+  const { name, iata, state } = req.query;
+  const limit = parseInt(req.query.limit) || 9; 
+  const offset = parseInt(req.query.offset) || 0; 
+  let query = 'SELECT * FROM Airports';
+  let queryParams = [];
+
+  if (name || iata || state) {
+    query += ' WHERE';
+    const conditions = [];
+    if (name) {
+      conditions.push(' airport LIKE ?');
+      queryParams.push(`%${name}%`);
+    }
+    if (iata) {
+      conditions.push(' iata LIKE ?');
+      queryParams.push(`%${iata}%`);
+    }
+    if (state) {
+      conditions.push(' state LIKE ?');
+      queryParams.push(`%${state}%`);
+    }
+    query += conditions.join(' AND');
+  }
+
+  query += ' LIMIT ? OFFSET ?';
+  queryParams.push(parseInt(limit) || 9, parseInt(offset) || 0);
+
+  connection.query(query, queryParams, (err, data) => {
+    if (err) {
+      console.log(err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else if (data.length === 0) {
+      res.status(404).json({ error: 'No airports found' });
+    } else {
+      res.json(data);
+    }
+  });
+};
 
 // Route 3: GET /airbnbs
 const airbnbs = async function(req, res) {
@@ -216,10 +273,28 @@ const restaurantsNearAirbnb = async function(req, res) {
 
 // Route 8: GET /restaurant
 const restaurants = async function(req, res) {
-  connection.query(`
-  SELECT *
-  FROM Restaurant`, 
-  (err, data) => {
+  const limit = parseInt(req.query.limit) || 9; 
+  const offset = parseInt(req.query.offset) || 0; 
+  const filter = req.query.filter || ''; 
+  const sort = req.query.sort || ''; 
+  let query = 'SELECT * FROM Restaurant';
+  let queryParams = [];
+
+  if (filter) {
+    query += ' WHERE category LIKE ? OR title LIKE ?';
+    queryParams.push(`%${filter}%`, `%${filter}%`);
+  }
+
+  if (sort === 'rating') {
+    query += ' ORDER BY rating DESC';
+  } else if (sort === 'price') {
+    query += ' ORDER BY price ASC';
+  }
+
+  query += ' LIMIT ? OFFSET ?';
+  queryParams.push(limit, offset);
+
+  connection.query(query, queryParams, (err, data) => {
     if (err || data.length === 0) {
       console.log(err);
       res.json({});
@@ -227,7 +302,8 @@ const restaurants = async function(req, res) {
       res.json(data);
     }
   });
-}
+};
+
 
 // Route 9: GET /RestaurantAffordableAirbnbAirport/:latitude/:longitude
 const RestaurantAffordableAirbnbAirport = async function(req, res) {
@@ -405,6 +481,34 @@ const getCitiesByState = async function(req, res) {
   });
 };
 
+// Route: GET /restaurants/:restaurantId
+const getRestaurantDetail = async function(req, res) {
+  const restaurantId = req.params.restaurantId;
+  connection.query('SELECT * FROM Restaurant WHERE restaurant_id = ?', [restaurantId], (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err);
+      res.json({});
+    } else {
+      res.json(data[0]); 
+    }
+  });
+};
+
+// Route: GET /airportByIATA/:iata
+const getAirportByIATA = async function(req, res) {
+  const iataCode = req.params.iata;
+
+  connection.query('SELECT * FROM Airports WHERE iata = ?', [iataCode], (err, data) => {
+    if (err) {
+      console.error('Error fetching airport details:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else if (data.length === 0) {
+      res.status(404).json({ error: 'Airport not found' });
+    } else {
+      res.json(data[0]);
+    }
+  });
+};
 
 
 
@@ -421,5 +525,8 @@ module.exports = {
   RestaurantAffordableAirbnbAirport,
   AirbnbsRestaurantCategory,
   getAllStates,
-  getCitiesByState
+  getCitiesByState,
+  getRestaurantDetail,
+  getAllAirports,
+  getAirportByIATA
 }
