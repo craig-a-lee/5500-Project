@@ -56,7 +56,8 @@ app.get('/restaurants/:restaurantId', routes.getRestaurantDetail);
 // Route: GET /airports/:iata
 app.get('/airportByIATA/:iata', routes.getAirportByIATA);
 
-
+// Route: GET /airbnbs/:listingId
+app.get('/airbnbs/:listingId', routes.getAirbnbDetail);
 
 app.listen(config.server_port, () => {
   console.log(`Server running at http://${config.server_host}:${config.server_port}/`)

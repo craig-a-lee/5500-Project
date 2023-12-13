@@ -83,7 +83,7 @@ function Airbnbs() {
               <p>{listing.neighborhood}</p>
               <p>{`$${listing.price} per night`}</p>
               <p>{`Minimum nights: ${listing.min_nights}`}</p>
-              <Link to={`/airbnb/${listing.listing_id}`} className="text-blue-300 hover:text-blue-500">View Details</Link>
+              <Link to={`/airbnbs/${listing.listing_id}`} className="text-blue-300 hover:text-blue-500">View Details</Link>
             </div>
           ))}
         </div>

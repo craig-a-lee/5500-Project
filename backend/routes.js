@@ -510,6 +510,21 @@ const getAirportByIATA = async function(req, res) {
   });
 };
 
+// Route: GET /airbnbs/:listingId
+const getAirbnbDetail = async function(req, res) {
+  const listingId = req.params.listingId;
+
+  connection.query('SELECT * FROM Airbnb WHERE listing_id = ?', [listingId], (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err);
+      res.status(404).json({ error: 'Airbnb not found' });
+    } else {
+      res.json(data[0]);
+    }
+  });
+};
+
+
 
 
 
@@ -528,5 +543,6 @@ module.exports = {
   getCitiesByState,
   getRestaurantDetail,
   getAllAirports,
-  getAirportByIATA
+  getAirportByIATA,
+  getAirbnbDetail
 }
