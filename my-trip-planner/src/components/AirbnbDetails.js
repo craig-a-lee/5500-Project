@@ -34,7 +34,6 @@ function AirbnbDetail() {
             <p className="text-lg">Latitude: {airbnb.latitude}</p>
             <p className="text-lg">Longitude: {airbnb.longitude}</p>
             <p className="text-lg">Availability: {airbnb.availability_365 ? 'Available' : 'Not available'} this year</p>
-            {/* Add more details as per your data structure */}
           </div>
         </div>
 

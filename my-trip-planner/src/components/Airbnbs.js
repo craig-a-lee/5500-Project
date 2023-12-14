@@ -116,7 +116,14 @@ function Airbnbs() {
             </div>
           ))}
         </div>
-        
+        <div className="flex justify-center mt-6">
+          <Link 
+            to="/bestNeighborhoods" 
+            className="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg text-lg font-medium hover:bg-gray-100 transition duration-300"
+          >
+            Best Neighborhoods
+          </Link>
+        </div>
       </div>
     </div>
   );

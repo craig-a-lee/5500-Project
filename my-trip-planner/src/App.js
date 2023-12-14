@@ -9,6 +9,7 @@ import RestaurantDetail from './components/RestaurantDetails';
 import Airports from './components/Airports';
 import AirportDetails from './components/AirportDetails';
 import AirbnbDetail from './components/AirbnbDetails';
+import BestNeighborhoods from './components/BestNeighborhoods';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/airports" element={<Airports />} />
         <Route path="/airportByIATA/:iata" element={<AirportDetails />} />
         <Route path="/airbnbs/:listingId" element={<AirbnbDetail />} />
+        <Route path="/bestNeighborhoods" element={<BestNeighborhoods />} />
       </Routes>
     </Router>
   );
