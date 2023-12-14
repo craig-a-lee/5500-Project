@@ -20,7 +20,7 @@ connection.connect((err) => err && console.log(err));
 // Route 1: GET /airports/:state
 const airports = async function(req, res) {
   const stateVar = req.params.state;
-  const limit = parseInt(req.query.limit) || 10;
+  const limit = parseInt(req.query.limit) || 50;
   const offset = parseInt(req.query.offset) || 0;
   const sortBy = req.query.sortBy || 'airport'; 
 
@@ -543,7 +543,257 @@ const getAirbnbDetail = async function(req, res) {
   });
 };
 
+const RestaurantAirbnbAirport = async function(req, res) {
+  const latitude = req.params.latitude;
+  const longitude = req.params.longitude;
+  const minNights = req.query.minNights ?? 365;
+  const roomType = req.query.roomType ?? '%%';
+  const restaurantCategory = req.query.restaurantCategory ?? '%%';
+  const restaurantRating = req.query.restaurantRating ?? 0;
 
+  connection.query(`
+  WITH closest_restaurant AS (
+    SELECT
+        R.title,
+        R.latitude,
+        R.longitude,
+        (
+            3959 * 2 * ASIN(SQRT(
+                POWER(SIN((RADIANS(R.latitude) - RADIANS((${latitude}))) / 2), 2) +
+                COS(RADIANS(R.latitude)) * COS(RADIANS((${latitude}))) *
+                POWER(SIN((RADIANS(R.longitude) - RADIANS((${longitude}))) / 2), 2)
+            ))
+        ) AS distance_to_restaurant
+    FROM Restaurant R
+    WHERE R.category LIKE '%${restaurantCategory}%'
+        AND R.rating > ${restaurantRating}
+    ORDER BY distance_to_restaurant
+    LIMIT 1
+ ),
+ closest_airbnb AS (
+    SELECT
+        A.listing_name,
+        A.latitude,
+        A.longitude,
+        APS.price,
+        (
+            3959 * 2 * ASIN(SQRT(
+                POWER(SIN((RADIANS(A.latitude) - RADIANS((${latitude}))) / 2), 2) +
+                COS(RADIANS(A.latitude)) * COS(RADIANS((${latitude}))) *
+                POWER(SIN((RADIANS(A.longitude) - RADIANS((${longitude}))) / 2), 2)
+            ))
+        ) AS distance_to_airbnb
+    FROM Airbnb A
+    INNER JOIN Airbnb APS ON A.neighborhood = APS.neighborhood
+        AND A.min_nights < ${minNights}
+        AND A.room_type LIKE '%${roomType}%'
+    ORDER BY distance_to_airbnb
+    LIMIT 1
+ ),
+ closest_airport AS (
+    SELECT
+        AP.airport,
+        AP.latitude,
+        AP.longitude,
+        (
+            3959 * 2 * ASIN(SQRT(
+                POWER(SIN((RADIANS(AP.latitude) - RADIANS((${latitude}))) / 2), 2) +
+                COS(RADIANS(AP.latitude)) * COS(RADIANS((${latitude}))) *
+                POWER(SIN((RADIANS(AP.longitude) - RADIANS((${longitude}))) / 2), 2)
+            ))
+        ) AS distance_to_airport
+    FROM Airports AP
+    ORDER BY distance_to_airport
+    LIMIT 1
+ )
+ SELECT
+    CR.title AS restaurant_name,
+    CR.distance_to_restaurant,
+    CA.listing_name AS airbnb_name,
+    CA.distance_to_airbnb,
+    CA.price AS airbnb_price,
+    CPA.airport AS closest_airport_name,
+    CPA.distance_to_airport,
+    3959 * 2 * ASIN(SQRT(
+        POWER(SIN((RADIANS(CR.latitude) - RADIANS(CA.latitude)) / 2), 2) +
+        COS(RADIANS(CR.latitude)) * COS(RADIANS(CA.latitude)) *
+        POWER(SIN((RADIANS(CR.longitude) - RADIANS(CA.longitude)) / 2), 2)
+    )) AS distance_restaurant_to_airbnb,
+    3959 * 2 * ASIN(SQRT(
+        POWER(SIN((RADIANS(CA.latitude) - RADIANS(CPA.latitude)) / 2), 2) +
+        COS(RADIANS(CA.latitude)) * COS(RADIANS(CPA.latitude)) *
+        POWER(SIN((RADIANS(CA.longitude) - RADIANS(CPA.longitude)) / 2), 2)
+    )) AS distance_airbnb_to_airport
+ FROM closest_restaurant CR
+ CROSS JOIN closest_airbnb CA
+ CROSS JOIN closest_airport CPA;`, 
+  
+  (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err);
+      res.json({});
+    } else {
+      res.json(data);
+    }
+  });
+}
+
+// Route: GET /shortLayoverTrip/:airportCode
+const shortLayoverTrip = async function(req, res) {
+  const airportCode = req.params.airportCode;
+
+  connection.query(
+    `WITH ClosestAirport AS (
+      SELECT
+          AP.airport,
+          AP.latitude AS ap_latitude,
+          AP.longitude AS ap_longitude
+      FROM Airports AP
+      WHERE AP.iata = '${airportCode}'
+      LIMIT 1
+  ),
+  CheapestAirbnbNearAirport AS (
+      SELECT
+          A.listing_name,
+          A.latitude,
+          A.longitude,
+          A.price,
+          (
+              3959 * 2 * ASIN(SQRT(
+                  POWER(SIN((RADIANS(A.latitude) - RADIANS(CA.ap_latitude)) / 2), 2) +
+                  COS(RADIANS(A.latitude)) * COS(RADIANS(CA.ap_latitude)) *
+                  POWER(SIN((RADIANS(A.longitude) - RADIANS(CA.ap_longitude)) / 2), 2)
+              ))
+          ) AS distance_to_airport
+      FROM Airbnb A, ClosestAirport CA
+      WHERE
+          (
+              3959 * 2 * ASIN(SQRT(
+                  POWER(SIN((RADIANS(A.latitude) - RADIANS(CA.ap_latitude)) / 2), 2) +
+                  COS(RADIANS(A.latitude)) * COS(RADIANS(CA.ap_latitude)) *
+                  POWER(SIN((RADIANS(A.longitude) - RADIANS(CA.ap_longitude)) / 2), 2)
+              ))
+          ) <= 5
+      ORDER BY A.price ASC
+      LIMIT 1
+  ),
+  HighestRatedRestaurantNearAirport AS (
+      SELECT
+          R.title,
+          R.latitude,
+          R.longitude,
+          R.rating,
+          (
+              3959 * 2 * ASIN(SQRT(
+                  POWER(SIN((RADIANS(R.latitude) - RADIANS(CA.ap_latitude)) / 2), 2) +
+                  COS(RADIANS(R.latitude)) * COS(RADIANS(CA.ap_latitude)) *
+                  POWER(SIN((RADIANS(R.longitude) - RADIANS(CA.ap_longitude)) / 2), 2)
+              ))
+          ) AS distance_to_airport
+      FROM Restaurant R, ClosestAirport CA
+      WHERE
+          (
+              3959 * 2 * ASIN(SQRT(
+                  POWER(SIN((RADIANS(R.latitude) - RADIANS(CA.ap_latitude)) / 2), 2) +
+                  COS(RADIANS(R.latitude)) * COS(RADIANS(CA.ap_latitude)) *
+                  POWER(SIN((RADIANS(R.longitude) - RADIANS(CA.ap_longitude)) / 2), 2)
+              ))
+          ) <= 5
+      ORDER BY R.rating DESC
+      LIMIT 1
+  )
+  SELECT
+      CAR.listing_name AS airbnb_name,
+      CAR.price AS airbnb_price,
+      CAR.distance_to_airport AS distance_airbnb_to_airport,
+      HRR.title AS restaurant_name,
+      HRR.rating AS restaurant_rating,
+      HRR.distance_to_airport AS distance_restaurant_to_airport
+  FROM CheapestAirbnbNearAirport CAR
+  CROSS JOIN HighestRatedRestaurantNearAirport HRR`, 
+    (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err);
+      res.status(404).json({ error: 'Airbnb not found' });
+    } else {
+      res.json(data);
+    }
+  });
+};
+
+// Route: GET /bestNeighborhoods
+//Identify the top 5 neighborhoods with the most affordable Airbnbs and calculate the average distance to the closest high-rated restaurants within 15 miles in those neighborhoods.
+const bestNeighborhoods = async function(req, res) {
+
+  connection.query(`WITH AffordableAirbnbs AS (
+    SELECT
+        *,
+        AVG(price) AS AveragePrice
+    FROM
+        Airbnb
+    GROUP BY
+        neighborhood
+),
+RankedAffordableNeighborhoods AS (
+    SELECT
+        *,
+        RANK() OVER (ORDER BY AveragePrice) AS affordability_rank
+    FROM
+        AffordableAirbnbs
+),
+DistanceFromHighRatedRestaurants AS (
+    SELECT
+        R.*,
+        A.neighborhood,
+        A.city,
+        (
+            3959 * 2 * ASIN(SQRT(
+                POWER(SIN((RADIANS(R.latitude) - RADIANS(A.latitude)) / 2), 2) +
+                COS(RADIANS(A.latitude)) * COS(RADIANS(R.latitude)) *
+                POWER(SIN((RADIANS(R.longitude) - RADIANS(A.longitude)) / 2), 2)
+            ))
+        ) AS distance_to_restaurant
+    FROM
+        Airbnb A
+    JOIN
+        Restaurant R ON R.rating > 4.5
+    WHERE
+        A.neighborhood IN (SELECT neighborhood FROM RankedAffordableNeighborhoods WHERE affordability_rank <= 5)
+        AND (
+            3959 * 2 * ASIN(SQRT(
+                POWER(SIN((RADIANS(R.latitude) - RADIANS(A.latitude)) / 2), 2) +
+                COS(RADIANS(A.latitude)) * COS(RADIANS(R.latitude)) *
+                POWER(SIN((RADIANS(R.longitude) - RADIANS(A.longitude)) / 2), 2)
+            ))
+        ) <= 15 
+),
+AvgDistanceToRestaurants AS (
+    SELECT
+        neighborhood,
+        AVG(distance_to_restaurant) AS AverageDistanceToRestaurants
+    FROM
+        DistanceFromHighRatedRestaurants
+    GROUP BY
+        neighborhood
+)
+SELECT
+    *
+FROM
+    RankedAffordableNeighborhoods RAN
+JOIN
+    AvgDistanceToRestaurants ADTR ON RAN.neighborhood = ADTR.neighborhood
+WHERE
+    RAN.affordability_rank <= 5
+ORDER BY
+    RAN.AveragePrice, ADTR.AverageDistanceToRestaurants;`, (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err);
+      res.status(404).json({ error: 'Airbnb not found' });
+    } else {
+      res.json(data);
+    }
+  });
+};
 
 
 
@@ -563,5 +813,8 @@ module.exports = {
   getRestaurantDetail,
   getAllAirports,
   getAirportByIATA,
-  getAirbnbDetail
+  getAirbnbDetail,
+  RestaurantAirbnbAirport,
+  shortLayoverTrip,
+  bestNeighborhoods
 }

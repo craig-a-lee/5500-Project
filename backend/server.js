@@ -41,6 +41,9 @@ app.get('/restaurants', routes.restaurants);
 // Route 9: GET /RestaurantAffordableAirbnbAirport/:latitude/:longitude
 app.get('/RestaurantAffordableAirbnbAirport/:latitude/:longitude', routes.RestaurantAffordableAirbnbAirport);
 
+// GET /RestaurantAffordableAirbnbAirport/:latitude/:longitude
+app.get('/RestaurantAirbnbAirport/:latitude/:longitude', routes.RestaurantAirbnbAirport);
+
 // Route 10: GET /AirbnbsRestaurantCategory/:category
 app.get('/AirbnbsRestaurantCategory/:category', routes.AirbnbsRestaurantCategory);
 
@@ -58,6 +61,13 @@ app.get('/airportByIATA/:iata', routes.getAirportByIATA);
 
 // Route: GET /airbnbs/:listingId
 app.get('/airbnbs/:listingId', routes.getAirbnbDetail);
+
+// Route: GET /shortLayoverTrip/:airportCode
+app.get('/shortLayoverTrip/:airportCode', routes.shortLayoverTrip);
+
+// Route: GET /bestNeighborhoods
+app.get('/bestNeighborhoods', routes.bestNeighborhoods);
+
 
 app.listen(config.server_port, () => {
   console.log(`Server running at http://${config.server_host}:${config.server_port}/`)
