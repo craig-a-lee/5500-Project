@@ -9,13 +9,14 @@ function Airbnbs() {
   const [listingsPerPage, setListingsPerPage] = useState(9);
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState('');
+  const [maxPrice, setMaxPrice] = useState(5000);
 
   const fetchListings = useCallback((offset) => {
-    fetch(`http://${config.server_host}:${config.server_port}/airbnbs?limit=${listingsPerPage}&offset=${offset}&filter=${filter}`)
+    fetch(`http://${config.server_host}:${config.server_port}/airbnbs?limit=${listingsPerPage}&offset=${offset}&filter=${filter}&priceFilter=${maxPrice}`)
       .then(response => response.json())
       .then(data => setListings(data))
       .catch(error => console.error('Error fetching Airbnb data:', error));
-  }, [listingsPerPage, filter]); 
+  }, [listingsPerPage, filter, maxPrice]); 
 
   const fetchHighPricedListings = useCallback(() => {
     fetch(`http://${config.server_host}:${config.server_port}/airbnbsHighPrice`)
@@ -49,6 +50,10 @@ function Airbnbs() {
     setListingsPerPage(parseInt(e.target.value));
   }
 
+  const handlePriceChange = (e) => {
+    setMaxPrice(parseInt(e.target.value));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-400 to-indigo-600 text-white flex flex-col justify-center py-10">
       <div className="container mx-auto px-4">
@@ -60,6 +65,17 @@ function Airbnbs() {
             onChange={handleFilterChange}
             className="p-2 rounded-md text-black"
             placeholder="Filter by neighborhood..."
+          />
+        </div>
+        <div>
+          <span>Max Price: {maxPrice} </span>
+          <input
+            type="range"
+            name="max"
+            min={0}
+            max={5000}
+            value={maxPrice}
+            onChange={handlePriceChange}
           />
         </div>
         <div className="mb-4">
