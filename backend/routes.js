@@ -268,8 +268,8 @@ const restaurantsNearAirbnb = async function(req, res) {
       )
   SELECT title, address, category, rating, website, phone, distance
   FROM distances
-  WHERE distance < 10
-  ORDER BY ${distance};`,
+  WHERE distance < ${distance}
+  ORDER BY distance;`,
   (err, data) => {
     if (err || data.length === 0) {
       console.log(err);
@@ -299,11 +299,9 @@ const restaurants = async function(req, res) {
   if (!filter) {
     query += ' WHERE rating >= ?'
     queryParams.push(ratingFilter);
-    console.log(ratingFilter);
   } else {
     query += ' AND rating >= ?'
     queryParams.push(ratingFilter);
-    console.log(ratingFilter);
   }
 
   if (sort === 'rating') {
