@@ -45,9 +45,11 @@ function PlanTrips() {
       .then(data => {
         setLoading(false); 
         if (Array.isArray(data)) {
+          console.log('dataaa');
           setAirbnbs(data);
         } else {
           setAirbnbs([]);
+          console.log('no dataaa');
           console.log('No data available or invalid data format');
         }
       })
@@ -59,6 +61,7 @@ function PlanTrips() {
   
   const fetchRestaurantsNearAirport = (airportCode, distance) => {
     setLoading(true); 
+    console.log('hereee');
     fetch(`http://${config.server_host}:${config.server_port}/restaurantNearAirport/${airportCode}/${distance}`)
       .then(response => response.json())
       .then(data => {

@@ -1,5 +1,6 @@
 const mysql = require('mysql')
-const config = require('./config.json')
+const config = require('./config.json');
+const e = require('cors');
 
 // Creates MySQL connection using database credential provided in config.json
 // Do not edit. If the connection fails, make sure to check that config.json is filled out correctly
@@ -112,12 +113,21 @@ const airbnbs = async function(req, res) {
   const limit = parseInt(req.query.limit) || 9; 
   const offset = parseInt(req.query.offset) || 0; 
   const filter = req.query.filter || ''; 
+  const priceFilter = req.query.priceFilter || 5000;
   let query = 'SELECT * FROM Airbnb';
   let queryParams = [];
 
   if (filter) {
-    query += ' WHERE neighborhood LIKE ? OR listing_name LIKE ?';
+    query += ' WHERE (neighborhood LIKE ? OR listing_name LIKE ?)';
     queryParams.push(`%${filter}%`, `%${filter}%`);
+  }
+
+  if (!filter) {
+    query += ' WHERE price <= ?'
+    queryParams.push(priceFilter);
+  } else {
+    query += ' AND price <= ?'
+    queryParams.push(priceFilter);
   }
 
   query += ' LIMIT ? OFFSET ?';
@@ -276,13 +286,24 @@ const restaurants = async function(req, res) {
   const limit = parseInt(req.query.limit) || 9; 
   const offset = parseInt(req.query.offset) || 0; 
   const filter = req.query.filter || ''; 
+  const ratingFilter = req.query.rating || 0;
   const sort = req.query.sort || ''; 
   let query = 'SELECT * FROM Restaurant';
   let queryParams = [];
 
   if (filter) {
-    query += ' WHERE category LIKE ? OR title LIKE ?';
+    query += ' WHERE (category LIKE ? OR title LIKE ?)';
     queryParams.push(`%${filter}%`, `%${filter}%`);
+  }
+
+  if (!filter) {
+    query += ' WHERE rating >= ?'
+    queryParams.push(ratingFilter);
+    console.log(ratingFilter);
+  } else {
+    query += ' AND rating >= ?'
+    queryParams.push(ratingFilter);
+    console.log(ratingFilter);
   }
 
   if (sort === 'rating') {
