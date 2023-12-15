@@ -17,6 +17,7 @@ connection.connect((err) => err && console.log(err));
  * WARM UP ROUTES *
  ******************/
 
+// Returns all information about airports in a given state
 // Route 1: GET /airports/:state
 const airports = async function(req, res) {
   const stateVar = req.params.state;
@@ -42,6 +43,7 @@ const airports = async function(req, res) {
   });
 };
 
+// Returns all information about airports in a given city
 // Route 2: GET /airportsCity/:city
 const airportsCity = async function(req, res) {
   const cityName = req.params.city;
@@ -67,6 +69,7 @@ const airportsCity = async function(req, res) {
   });
 };
 
+// Returns information about all airports
 // Route: GET /airports
 const getAllAirports = async function(req, res) {
   const { name, iata, state } = req.query;
@@ -108,6 +111,7 @@ const getAllAirports = async function(req, res) {
   });
 };
 
+// Returns all information about all Airbnbs
 // Route 3: GET /airbnbs
 const airbnbs = async function(req, res) {
   const limit = parseInt(req.query.limit) || 9; 
@@ -144,6 +148,7 @@ const airbnbs = async function(req, res) {
 };
 
 
+// Returns the neighborhood and average price of Airbnbs in neighborhoods with the highest Airbnb prices
 // Route 4: GET /airbnbsHighPrice
 const airbnbsHighPrice = async function(req, res) {
   connection.query(`
@@ -163,6 +168,7 @@ const airbnbsHighPrice = async function(req, res) {
   });
 }
 
+// Returns some relevant information about all Airbnbs within a certain distance of a given airport
 // Route 5: GET /airbnbsNearAirport/:airportCode/:distance
 const airbnbsNearAirport = async function(req, res) {
   const airportCode = req.params.airportCode;
@@ -202,6 +208,7 @@ const airbnbsNearAirport = async function(req, res) {
   });
 }
 
+// Returns some relevant information about all Restaurants within a certain distance of a given
 // Route 6: GET /restaurantNearAirport/:airportCode/:distance
 const restaurantNearAirport = async function(req, res) {
   const airportCode = req.params.airportCode;
@@ -241,6 +248,7 @@ const restaurantNearAirport = async function(req, res) {
   });
 }
 
+// Returns some relevant information about all Restaurants within a certain distance of a given Airbnb
 // Route 7: GET /restaurantsNearAirbnb/:listingID/:distance
 const restaurantsNearAirbnb = async function(req, res) {
   const listingID = req.params.listingID;
@@ -280,7 +288,7 @@ const restaurantsNearAirbnb = async function(req, res) {
   });
 }
 
-
+// Returns all information about all restaurants
 // Route 8: GET /restaurant
 const restaurants = async function(req, res) {
   const limit = parseInt(req.query.limit) || 9; 
@@ -324,6 +332,7 @@ const restaurants = async function(req, res) {
 };
 
 
+// Finds the closest restaurant, affordable Airbnb (based on if it is less than average in its neighborhood), and Airport pair given a latitude and longitude; finds all distances between
 // Route 9: GET /RestaurantAffordableAirbnbAirport/:latitude/:longitude
 const RestaurantAffordableAirbnbAirport = async function(req, res) {
   const latitude = req.params.latitude;
@@ -428,6 +437,7 @@ const RestaurantAffordableAirbnbAirport = async function(req, res) {
   });
 }
 
+// Returns relevant information about Airbnbs that are near the highest rated Restaurant of a certain category
 // Route 10: GET /AirbnbsRestaurantCategory/:category
 const AirbnbsRestaurantCategory = async function(req, res) {
   const category = req.params.category;
@@ -475,6 +485,7 @@ const AirbnbsRestaurantCategory = async function(req, res) {
   });
 }
 
+// Returns all states that are found in Airports
 // Route 11: GET /allStates
 const getAllStates = async function(req, res) {
   connection.query('SELECT DISTINCT state FROM Airports ORDER BY state', (err, data) => {
@@ -487,6 +498,7 @@ const getAllStates = async function(req, res) {
   });
 };
 
+// Returns all cities that have airports in a given state
 // Route 11: GET /state/:city
 const getCitiesByState = async function(req, res) {
   const state = req.params.state;
@@ -500,6 +512,7 @@ const getCitiesByState = async function(req, res) {
   });
 };
 
+// Returns all information about a restaurant given its restaurant id
 // Route: GET /restaurants/:restaurantId
 const getRestaurantDetail = async function(req, res) {
   const restaurantId = req.params.restaurantId;
@@ -513,6 +526,7 @@ const getRestaurantDetail = async function(req, res) {
   });
 };
 
+// Returns all information about an airport given its IATA
 // Route: GET /airportByIATA/:iata
 const getAirportByIATA = async function(req, res) {
   const iataCode = req.params.iata;
@@ -529,6 +543,7 @@ const getAirportByIATA = async function(req, res) {
   });
 };
 
+// Returns all information about an Airbnb given its listing id
 // Route: GET /airbnbs/:listingId
 const getAirbnbDetail = async function(req, res) {
   const listingId = req.params.listingId;
@@ -543,6 +558,7 @@ const getAirbnbDetail = async function(req, res) {
   });
 };
 
+// Finds the closest restaurant, Airbnb, and airport to a given latitude and longitude, considering specific user preferences and constraints.
 // GET /RestaurantAirbnbAirport/:latitude/:longitude
 const RestaurantAirbnbAirport = async function(req, res) {
   const latitude = req.params.latitude;
@@ -639,6 +655,7 @@ const RestaurantAirbnbAirport = async function(req, res) {
   });
 }
 
+// Finds the cheapest Airbnb and the highest-rated restaurant within a 5-mile radius of a specific airport.
 // Route: GET /shortLayoverTrip/:airportCode
 const shortLayoverTrip = async function(req, res) {
   const airportCode = req.params.airportCode;
@@ -723,7 +740,7 @@ const shortLayoverTrip = async function(req, res) {
 };
 
 // Route: GET /bestNeighborhoods
-//Identify the top 5 neighborhoods with the most affordable Airbnbs and calculate the average distance to the closest high-rated restaurants within 15 miles in those neighborhoods.
+// Identifies the top 5 neighborhoods with the most affordable Airbnbs and calculate the average distance to the closest high-rated restaurants within 15 miles in those neighborhoods.
 const bestNeighborhoods = async function(req, res) {
 
   connection.query(`WITH AffordableAirbnbs AS (
