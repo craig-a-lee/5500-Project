@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import RestaurantsNearAirbnb from './RestaurantsNearAirbnb';
 
 function AirbnbDetail() {
   const { listingId } = useParams();
   const [airbnb, setAirbnb] = useState(null);
+  const [distance, setDistance] = useState(5);
 
   useEffect(() => {
     fetch(`http://localhost:8080/airbnbs/${listingId}`) 
@@ -15,6 +17,10 @@ function AirbnbDetail() {
 
   if (!airbnb) {
     return <div className="loading">Loading...</div>;
+  }
+
+  const handleDistanceChange = (event) => {
+    setDistance(event.target.value);
   }
 
   return (
@@ -37,8 +43,19 @@ function AirbnbDetail() {
           </div>
         </div>
 
+        <div className="text-center mb-4">
+          <label htmlFor="distance">Find restaurants within (miles): </label>
+          <input 
+            type="number" 
+            id="distance" 
+            value={distance} 
+            onChange={handleDistanceChange} 
+            className="p-2 rounded-md text-black"
+          />
+        </div>
+        <RestaurantsNearAirbnb listingId={listingId} distance={distance} />
         <div className="text-center">
-          <Link to="/airbnbs" className="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg text-lg font-medium hover:bg-gray-100 transition duration-300">Back to Airbnbs</Link>
+          <Link to="/airbnbs" className="inline-block bg-white text-blue-600 px-6 py-3 mt-4 rounded-lg text-lg font-medium hover:bg-gray-100 transition duration-300">Back to Airbnbs</Link>
         </div>
       </div>
     </div>

@@ -20,7 +20,7 @@ connection.connect((err) => err && console.log(err));
 // Route 1: GET /airports/:state
 const airports = async function(req, res) {
   const stateVar = req.params.state;
-  const limit = parseInt(req.query.limit) || 10;
+  const limit = parseInt(req.query.limit) || 50;
   const offset = parseInt(req.query.offset) || 0;
   const sortBy = req.query.sortBy || 'airport'; 
 
@@ -268,8 +268,8 @@ const restaurantsNearAirbnb = async function(req, res) {
       )
   SELECT title, address, category, rating, website, phone, distance
   FROM distances
-  WHERE distance < 10
-  ORDER BY ${distance};`,
+  WHERE distance < ${distance}
+  ORDER BY distance;`,
   (err, data) => {
     if (err || data.length === 0) {
       console.log(err);
@@ -299,11 +299,9 @@ const restaurants = async function(req, res) {
   if (!filter) {
     query += ' WHERE rating >= ?'
     queryParams.push(ratingFilter);
-    console.log(ratingFilter);
   } else {
     query += ' AND rating >= ?'
     queryParams.push(ratingFilter);
-    console.log(ratingFilter);
   }
 
   if (sort === 'rating') {

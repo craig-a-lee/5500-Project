@@ -13,9 +13,10 @@ function PlanTrips() {
 
   const [airbnbPage, setAirbnbPage] = useState(1);
   const [restaurantPage, setRestaurantPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 25;
   const [loading, setLoading] = useState(false);
   const [sortCriteria, setSortCriteria] = useState('');
+  const [layoverPlan, setLayoverPlan] = useState(null);
 
   useEffect(() => {
     fetchStates();
@@ -27,9 +28,28 @@ function PlanTrips() {
   useEffect(() => {
     if (selectedAirport) {
       fetchAirbnbsNearAirport(selectedAirport, airbnbPage, itemsPerPage); 
-      fetchRestaurantsNearAirport(selectedAirport, restaurantPage, itemsPerPage);
+      fetchRestaurantsNearAirport(selectedAirport, restaurantPage);
+      fetchLayoverPlans(selectedAirport);
     }
   }, [selectedAirport, airbnbPage, restaurantPage]);
+
+  const fetchLayoverPlans = (airportCode) => {
+    fetch(`http://${config.server_host}:${config.server_port}/shortLayoverTrip/${airportCode}`)
+    .then(response => response.json())
+    .then(data => {
+      setLoading(false); 
+      if (Array.isArray(data)) {
+        setLayoverPlan(data[0]);
+      } else {
+        setLayoverPlan(null);
+        console.log('No data available or invalid data format');
+      }
+    })
+    .catch(error => {
+      setLoading(false); 
+      console.error('Error fetching Airbnbs near airport:', error);
+    });
+  };
 
   const fetchAirportsByState = (state) => {
     fetch(`http://${config.server_host}:${config.server_port}/airports/${state}`)
@@ -75,7 +95,7 @@ function PlanTrips() {
         console.error('Error fetching restaurants near airport:', error);
       });
   };
-  
+
 
   const fetchStates = () => {
     fetch(`http://${config.server_host}:${config.server_port}/allStates`)
@@ -152,42 +172,58 @@ function PlanTrips() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <section className="airports p-6 bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-xl shadow-lg">
-            <h2 className="text-2xl font-semibold mb-3">Airports</h2>
-            <ul>
-              {airports.map(airport => (
-                <li 
-                  key={airport.iata} 
-                  className="mb-2 p-2 rounded cursor-pointer hover:bg-blue-500 hover:bg-opacity-50 transition duration-300"
-                  onClick={() => handleAirportSelect(airport.iata)}
-                >
-                  {airport.airport} - {airport.iata}
-                </li>
-              ))}
-            </ul>
-          </section>
+          <h2 className="text-2xl font-semibold mb-3">Airports</h2>
+          <ul style={{ maxHeight: '300px', overflowY: 'auto' }}>
+            {airports.map(airport => (
+              <li 
+                key={airport.iata} 
+                className="mb-2 p-2 rounded cursor-pointer hover:bg-blue-500 hover:bg-opacity-50 transition duration-300"
+                onClick={() => handleAirportSelect(airport.iata)}
+              >
+                {airport.airport} - {airport.iata}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+          
 
           <section className="airbnbs p-6 bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-xl shadow-lg">
             <h2 className="text-2xl font-semibold mb-3">Airbnbs</h2>
-            <ul>
+            <ul style={{ maxHeight: '300px', overflowY: 'auto' }}>
               {airbnbs.map(airbnb => (
                 <li key={airbnb.listing_id} className="mb-2 p-2 rounded">
                   {airbnb.listing_name} - ${airbnb.price}/night
                 </li>
               ))}
             </ul>
-            <button onClick={handleLoadMoreAirbnbs} className="mt-4 p-2 bg-blue-500 rounded hover:bg-blue-600 transition duration-300">Load More</button>
+            {/* <button onClick={handleLoadMoreAirbnbs} className="mt-4 p-2 bg-blue-500 rounded hover:bg-blue-600 transition duration-300">Load More</button> */}
           </section>
 
           <section className="restaurants p-6 bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-xl shadow-lg">
             <h2 className="text-2xl font-semibold mb-3">Restaurants</h2>
-            <ul>
+            <ul style={{ maxHeight: '300px', overflowY: 'auto' }}>
               {restaurants.map(restaurant => (
                 <li key={restaurant.id} className="mb-2 p-2 rounded">
                   {restaurant.title} - {restaurant.category}- {restaurant.rating}
                 </li>
               ))}
             </ul>
-            <button onClick={handleLoadMoreRestaurants} className="mt-4 p-2 bg-blue-500 rounded hover:bg-blue-600 transition duration-300">Load More</button>
+            {/* <button onClick={handleLoadMoreRestaurants} className="mt-4 p-2 bg-blue-500 rounded hover:bg-blue-600 transition duration-300">Load More</button> */}
+          </section>
+
+          <section className="restaurants p-6 bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-xl shadow-lg">
+            <h2 className="text-2xl font-semibold mb-3">Short Layover Trip Recommendation</h2>
+            {layoverPlan !== null && (
+              <>
+                <p className="text-lg">Airbnb: {layoverPlan.airbnb_name}</p>
+                <p className="text-lg">Price: ${layoverPlan.airbnb_price} per night</p>
+                <p className="text-lg">Distance from Airport to Airbnb: {layoverPlan.distance_airbnb_to_airport.toFixed(2)} km</p>
+                <p className="text-lg">Restaurant Name: {layoverPlan.restaurant_name}</p>
+                <p className="text-lg">Restaurant Rating: {layoverPlan.restaurant_rating}</p>
+                <p className="text-lg">Distance from Airport to Restaurant: {layoverPlan.distance_restaurant_to_airport.toFixed(2)} km</p> 
+              </>
+            )}
           </section>
         </div>
       </div>
