@@ -1,4 +1,3 @@
-// NearbyRestaurants.js
 import React, { useState, useEffect } from 'react';
 
 const RestaurantsNearAirbnb = ({ listingId, distance }) => {

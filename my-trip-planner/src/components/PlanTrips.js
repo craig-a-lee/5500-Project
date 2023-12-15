@@ -197,7 +197,7 @@ function PlanTrips() {
                 </li>
               ))}
             </ul>
-            {/* <button onClick={handleLoadMoreAirbnbs} className="mt-4 p-2 bg-blue-500 rounded hover:bg-blue-600 transition duration-300">Load More</button> */}
+            <button onClick={handleLoadMoreAirbnbs} className="mt-4 p-2 bg-blue-500 rounded hover:bg-blue-600 transition duration-300">Load More</button>
           </section>
 
           <section className="restaurants p-6 bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-xl shadow-lg">
@@ -209,7 +209,7 @@ function PlanTrips() {
                 </li>
               ))}
             </ul>
-            {/* <button onClick={handleLoadMoreRestaurants} className="mt-4 p-2 bg-blue-500 rounded hover:bg-blue-600 transition duration-300">Load More</button> */}
+            <button onClick={handleLoadMoreRestaurants} className="mt-4 p-2 bg-blue-500 rounded hover:bg-blue-600 transition duration-300">Load More</button>
           </section>
 
           <section className="restaurants p-6 bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-xl shadow-lg">
